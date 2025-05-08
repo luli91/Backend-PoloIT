@@ -1,0 +1,9 @@
+DATABASE_URL=postgresql://usuario:contraseña@host:puerto/basededatos
+
+JWT_SECRET=clave_segura
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+CLOUDINARY_CLOUD_NAME=nombre
+CLOUDINARY_API_KEY=clave
+CLOUDINARY_API_SECRET=secreto
