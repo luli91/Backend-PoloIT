@@ -55,7 +55,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 @router.delete("/{usuario_id}")
 def eliminar_usuario(
     usuario_id: int,
-    admin: Usuario = Depends(solo_admin),  # ✅ solo si tiene rol "admin"
+    admin: Usuario = Depends(solo_admin), # Dependencia para verificar si el usuario es admin
     db: Session = Depends(get_db)
 ):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
