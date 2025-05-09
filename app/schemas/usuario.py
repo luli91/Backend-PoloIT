@@ -21,4 +21,4 @@ class UsuarioOut(BaseModel):
     ubicacion: Optional[UbicacionOut]
 
     class Config:
-        orm_mode = True
+        from_attributes = True

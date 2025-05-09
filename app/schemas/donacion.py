@@ -24,4 +24,4 @@ class DonacionOut(DonacionBase):
     estado: EstadoOut
 
     class Config:
-        orm_mode = True
+        from_attributes = True
