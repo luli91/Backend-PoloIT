@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-import app.models as models, app.schemas as schemas
+import app.models.models as models, app.schemas.schemas as schemas
 from passlib.hash import bcrypt
 
 def crear_usuario(db: Session, usuario: schemas.UsuarioCreate):
