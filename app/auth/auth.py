@@ -1,1 +1,0 @@
-# completar después con la lógica de login, verificación JWT, etc.
