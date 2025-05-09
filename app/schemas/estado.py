@@ -1,7 +1,13 @@
+from enum import Enum
 from pydantic import BaseModel
 
+class EstadoNombre(str, Enum):
+    pendiente = "pendiente"
+    entregado = "entregado"
+    cancelado = "cancelado"
+
 class EstadoBase(BaseModel):
-    nombre: str
+    nombre: EstadoNombre
 
 class EstadoCreate(EstadoBase):
     pass
