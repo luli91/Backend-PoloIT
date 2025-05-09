@@ -50,3 +50,18 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
     token = crear_token_acceso({"sub": str(usuario.id)})
     return {"access_token": token, "token_type": "bearer"}
+
+# Borrar usuario (solo admin)
+@router.delete("/{usuario_id}")
+def eliminar_usuario(
+    usuario_id: int,
+    admin: Usuario = Depends(solo_admin),  # ✅ solo si tiene rol "admin"
+    db: Session = Depends(get_db)
+):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    db.delete(usuario)
+    db.commit()
+    return {"ok": True, "mensaje": "Usuario eliminado"}
