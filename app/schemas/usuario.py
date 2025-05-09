@@ -8,6 +8,14 @@ class RolUsuario(str, Enum):
     admin = "admin"
 # NOTA: Actualmente los roles están limitados a "usuario" y "admin" por simplicidad.
 
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
 class UsuarioBase(BaseModel):
     nombre: str
     email: EmailStr
