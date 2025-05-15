@@ -64,6 +64,11 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 def leer_usuario_actual(usuario: Usuario = Depends(obtener_usuario_actual)):
     return usuario
 
+# Obtener lista completa de usuarios (solo admin)
+@router.get("/", response_model=list[UsuarioOut])
+def listar_usuarios(admin: Usuario = Depends(solo_admin), db: Session = Depends(get_db)):
+    return db.query(Usuario).all()
+
 
 # Borrar usuario (solo admin)
 @router.delete("/{usuario_id}")
