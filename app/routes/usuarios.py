@@ -1,11 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException
 # queda para mas adelante -- from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+
+# base de datos
 from app.database import SessionLocal
+
+# modelos y esquemas
 from app.models.usuario import Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioOut, LoginRequest, TokenResponse
+
+# hashing de contraseñas
 from app.auth.hashing import hash_password, verificar_password
-from app.auth.jwt import crear_token_acceso
+
+# JWT y autenticación
+from app.auth.jwt import crear_token_acceso, solo_admin, obtener_usuario_actual
 
 router = APIRouter(
     prefix="/usuarios",
@@ -50,6 +58,12 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
     token = crear_token_acceso({"sub": str(usuario.id)})
     return {"access_token": token, "token_type": "bearer"}
+
+# Obtener usuario actual
+@router.get("/me", response_model=UsuarioOut)
+def leer_usuario_actual(usuario: Usuario = Depends(obtener_usuario_actual)):
+    return usuario
+
 
 # Borrar usuario (solo admin)
 @router.delete("/{usuario_id}")
