@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
@@ -7,15 +7,10 @@ class Donacion(Base):
     __tablename__ = "donacion"
 
     id = Column(Integer, primary_key=True, index=True)
-    descripcion = Column(String)
-    cantidad = Column(Float)
-    imagen_url = Column(String)
+    descripcion = Column(String, nullable=False)    
+    cantidad = Column(Integer, nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
+    categoria_id = Column(Integer, ForeignKey("categoria.id"), nullable=False)
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
 
-    usuario_id = Column(Integer, ForeignKey("usuario.id"))
-    categoria_id = Column(Integer, ForeignKey("categoria.id"))
-    estado_id = Column(Integer, ForeignKey("estado.id"))
-
-    usuario = relationship("Usuario", back_populates="donaciones")
-    categoria = relationship("Categoria", back_populates="donaciones")
-    estado = relationship("Estado", back_populates="donaciones")
+    publicaciones = relationship("Publicacion", back_populates="donacion")

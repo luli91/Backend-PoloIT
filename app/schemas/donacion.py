@@ -1,17 +1,13 @@
 from pydantic import BaseModel
-from typing import Optional
 from datetime import datetime
-from .usuario import UsuarioOut
-from .categoria import CategoriaOut
-from .estado import EstadoOut
+from typing import List
+from schemas.publicacion import PublicacionOut
 
 class DonacionBase(BaseModel):
     descripcion: str
-    cantidad: float
-    imagen_url: Optional[str]
+    cantidad: int
     usuario_id: int
     categoria_id: int
-    estado_id: int
 
 class DonacionCreate(DonacionBase):
     pass
@@ -19,9 +15,14 @@ class DonacionCreate(DonacionBase):
 class DonacionOut(DonacionBase):
     id: int
     fecha_creacion: datetime
-    usuario: UsuarioOut
-    categoria: CategoriaOut
-    estado: EstadoOut
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
+    
+class DonacionWithPublicaciones(DonacionOut):
+    publicaciones: List[PublicacionOut]
+
+    model_config = {
+        "from_attributes": True
+    }
