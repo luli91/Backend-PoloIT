@@ -70,6 +70,23 @@ def listar_usuarios(admin: Usuario = Depends(solo_admin), db: Session = Depends(
     return db.query(Usuario).all()
 
 
+@router.get("/{usuario_id}", response_model=UsuarioOut)
+def obtener_usuario(
+    usuario_id: int,
+    usuario_actual: Usuario = Depends(obtener_usuario_actual),
+    db: Session = Depends(get_db)
+):
+    # Solo el mismo usuario o un admin puede ver los datos
+    if usuario_actual.id != usuario_id and usuario_actual.rol != "admin":
+        raise HTTPException(status_code=403, detail="Acceso no autorizado")
+
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    return usuario
+
+
 # Borrar usuario (solo admin)
 @router.delete("/{usuario_id}")
 def eliminar_usuario(
