@@ -15,3 +15,4 @@ class Publicacion(Base):
     visible = Column(Boolean, default=True)
 
     donacion = relationship("Donacion", back_populates="publicaciones")
+    estado = relationship("Estado")

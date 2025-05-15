@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
-from models.publicacion import Publicacion 
+
 
 class Donacion(Base):
     __tablename__ = "donacion"
@@ -15,3 +15,6 @@ class Donacion(Base):
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
 
     publicaciones = relationship("Publicacion", back_populates="donacion")
+    usuario = relationship("Usuario", back_populates="donaciones")
+    categoria = relationship("Categoria", back_populates="donaciones")
+    estado = relationship("Estado", back_populates="donaciones")

@@ -15,3 +15,4 @@ class Estado(Base):
     nombre = Column(SQLEnum(EstadoNombreEnum, name="estado_enum"), unique=True)
 
     donaciones = relationship("Donacion", back_populates="estado")
+    publicaciones = relationship("Publicacion", back_populates="estado") 
