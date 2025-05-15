@@ -6,8 +6,9 @@ class CategoriaBase(BaseModel):
 class CategoriaCreate(CategoriaBase):
     pass
 
-class CategoriaOut(CategoriaBase):
+class CategoriaOut(BaseModel):
     id: int
+    nombre: str
 
     model_config = {
         "from_attributes": True

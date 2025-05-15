@@ -30,9 +30,6 @@ class UsuarioOut(BaseModel):
     id: int
     nombre: str
     email: EmailStr
-    telefono: str
-    rol: RollUsuario
-    ubicacion: Optional[UbicacionOut]
 
     model_config = {
         "from_attributes": True
