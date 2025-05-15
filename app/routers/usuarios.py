@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 # queda para mas adelante -- from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 # base de datos
-from app.database import SessionLocal
+from app.database import get_db
 
 # modelos y esquemas
 from app.models.usuario import Usuario
@@ -19,14 +19,6 @@ router = APIRouter(
     prefix="/usuarios",
     tags=["usuarios"]
 )
-
-# Dependencia para obtener sesión de base de datos
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # Registro de nuevo usuario
 @router.post("/registro", response_model=UsuarioOut)
@@ -61,15 +53,19 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
 # Obtener usuario actual
 @router.get("/me", response_model=UsuarioOut)
-def leer_usuario_actual(usuario: Usuario = Depends(obtener_usuario_actual)):
+def leer_usuario_actual(usuario_actual: Usuario = Depends(obtener_usuario_actual), db: Session = Depends(get_db)):
+    usuario = db.query(Usuario)\
+        .options(selectinload(Usuario.ubicacion))\
+        .filter(Usuario.id == usuario_actual.id)\
+        .first()
     return usuario
 
 # Obtener lista completa de usuarios (solo admin)
 @router.get("/", response_model=list[UsuarioOut])
 def listar_usuarios(admin: Usuario = Depends(solo_admin), db: Session = Depends(get_db)):
-    return db.query(Usuario).all()
+    return db.query(Usuario).options(selectinload(Usuario.ubicacion)).all()
 
-
+# Obtener usuario por ID
 @router.get("/{usuario_id}", response_model=UsuarioOut)
 def obtener_usuario(
     usuario_id: int,
@@ -80,7 +76,10 @@ def obtener_usuario(
     if usuario_actual.id != usuario_id and usuario_actual.rol != "admin":
         raise HTTPException(status_code=403, detail="Acceso no autorizado")
 
-    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    usuario = db.query(Usuario)\
+        .options(selectinload(Usuario.ubicacion))\
+        .filter(Usuario.id == usuario_id).first()
+    
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
