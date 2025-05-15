@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from app.database import Base
 from datetime import datetime
+from app.database import Base
+from models.publicacion import Publicacion 
 
 class Donacion(Base):
     __tablename__ = "donacion"

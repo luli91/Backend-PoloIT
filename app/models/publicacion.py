@@ -2,8 +2,9 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
+from models.donacion import Donacion
 
-class Donacion(Base):
+class Publicacion(Base):
     __tablename__ = "publicacion"
 
     id = Column(Integer, primary_key=True, index=True)

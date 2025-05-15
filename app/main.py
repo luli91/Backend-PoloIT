@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 from app.models import usuario, donacion, categoria, estado, ubicacion
-from app.routes import usuarios, ping
+from app.routers import usuarios, ping
 
 # Crear tablas en la base de datos
 Base.metadata.create_all(bind=engine)
