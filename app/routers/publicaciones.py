@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, selectinload
+from typing import List
+
 from app.database import get_db
 from app.models.publicacion import Publicacion
 from app.models.donacion import Donacion
-from app.schemas.publicacion import PublicacionCreate, PublicacionOut
-from app.auth.jwt import obtener_usuario_actual
 from app.models.usuario import Usuario
+from app.schemas.publicacion import PublicacionCreate, PublicacionOut, PublicacionUpdate
+from app.auth.jwt import obtener_usuario_actual
+
 
 router = APIRouter(
     prefix="/publicaciones",
@@ -52,3 +55,40 @@ def crear_publicacion(
     db.refresh(nueva_pub)
     db.refresh(nueva_pub, attribute_names=["estado"]) #forzar la carga del estado
     return nueva_pub
+
+# Actualizar una publicación
+@router.put("/{publicacion_id}", response_model=PublicacionOut)
+def actualizar_publicacion(
+    publicacion_id: int,
+    datos: PublicacionUpdate,
+    usuario_actual: Usuario = Depends(obtener_usuario_actual),
+    db: Session = Depends(get_db)
+):
+    publicacion = db.query(Publicacion)\
+        .options(selectinload(Publicacion.estado), selectinload(Publicacion.donacion))\
+        .filter(Publicacion.id == publicacion_id).first()
+
+    if not publicacion:
+        raise HTTPException(status_code=404, detail="Publicación no encontrada")
+
+    if publicacion.donacion.usuario_id != usuario_actual.id and usuario_actual.rol != "admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta publicación")
+
+    for campo, valor in datos.dict(exclude_unset=True).items():
+        setattr(publicacion, campo, valor)
+
+    db.commit()
+    db.refresh(publicacion)
+    return publicacion
+
+# Mostrar todas las publicaciones de un usuario
+@router.get("/mias", response_model=List[PublicacionOut])
+def publicaciones_del_usuario(
+    usuario_actual: Usuario = Depends(obtener_usuario_actual),
+    db: Session = Depends(get_db)
+):
+    return db.query(Publicacion)\
+        .join(Publicacion.donacion)\
+        .filter(Donacion.usuario_id == usuario_actual.id)\
+        .options(selectinload(Publicacion.estado))\
+        .all()
