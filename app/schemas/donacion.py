@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional, List
+from typing import List
 
 from app.schemas.usuario import UsuarioOut
 from app.schemas.categoria import CategoriaOut
