@@ -21,7 +21,7 @@ class UsuarioBase(BaseModel):
     email: EmailStr
     telefono: str
     rol: RolUsuario
-    ubicacion_id: Optional[int] = None
+    ubicacion_id: int
 
 class UsuarioCreate(UsuarioBase):
     password: str
@@ -30,6 +30,9 @@ class UsuarioOut(BaseModel):
     id: int
     nombre: str
     email: EmailStr
+    telefono: str
+    rol: str
+    ubicacion: UbicacionOut
 
     model_config = {
         "from_attributes": True

@@ -7,6 +7,7 @@ from app.database import get_db
 
 # modelos y esquemas
 from app.models.usuario import Usuario
+from app.models.ubicacion import Ubicacion
 from app.schemas.usuario import UsuarioCreate, UsuarioOut, LoginRequest, TokenResponse
 
 # hashing de contraseñas
@@ -23,9 +24,15 @@ router = APIRouter(
 # Registro de nuevo usuario
 @router.post("/registro", response_model=UsuarioOut)
 def registrar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
+    # Verificar si el email ya está en uso
     usuario_existente = db.query(Usuario).filter(Usuario.email == usuario.email).first()
     if usuario_existente:
         raise HTTPException(status_code=400, detail="El email ya está registrado")
+    
+    # Validar que la ubicación exista
+    ubicacion = db.query(Ubicacion).filter(Ubicacion.id == usuario.ubicacion_id).first()
+    if not ubicacion:
+        raise HTTPException(status_code=400, detail="Ubicación inválida")    
 
     nuevo_usuario = Usuario(
         nombre=usuario.nombre,

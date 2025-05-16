@@ -12,7 +12,7 @@ class Usuario(Base):
     telefono = Column(String)
     password_hash = Column(String)
     rol = Column(String)
-    ubicacion_id = Column(Integer, ForeignKey("ubicacion.id"), nullable=True)
+    ubicacion_id = Column(Integer, ForeignKey("ubicacion.id"), nullable=False)
 
     ubicacion = relationship("Ubicacion", back_populates="usuarios") 
     donaciones = relationship("Donacion", back_populates="usuario")
