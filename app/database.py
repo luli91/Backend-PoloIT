@@ -13,6 +13,10 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # Conectar a la base PostgreSQL usando SQLAlchemy
 engine = create_engine(DATABASE_URL)
 
+with engine.connect() as connection:
+    result = connection.execute("SELECT 1")
+    print(result.fetchone())
+
 # Crear sesión para usar en las rutas (inyectada con Depends)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
