@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 import os
 from dotenv import load_dotenv
 
@@ -15,6 +15,13 @@ engine = create_engine(DATABASE_URL)
 
 # Crear sesión para usar en las rutas (inyectada con Depends)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def get_db():
+    db: Session = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Clase Base que heredan todos los modelos SQLAlchemy
 Base = declarative_base()
