@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 from app.models import usuario, donacion, categoria, estado, ubicacion, publicacion
-from app.routers import usuarios, donaciones, publicaciones, ping
+from app.routers import usuarios, donaciones, publicaciones, categorias, estados, ubicaciones, ping
 
 # Crear tablas en la base de datos (porque no uso Alembic)
 Base.metadata.create_all(bind=engine)
@@ -16,17 +16,20 @@ app = FastAPI(
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  #TBD reemplazar por dominios específicos
+    allow_origins=["*"],  #Cambiar en producción
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Incluir routers
+# Incluir todos los routers
 app.include_router(ping)
 app.include_router(usuarios)
 app.include_router(donaciones)
 app.include_router(publicaciones)
+app.include_router(categorias)
+app.include_router(estados)
+app.include_router(ubicaciones)
 
 # Endpoint raíz
 @app.get("/", tags=["Root"])
