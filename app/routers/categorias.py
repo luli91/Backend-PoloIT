@@ -6,7 +6,10 @@ from app.schemas.categoria import CategoriaCreate, CategoriaOut
 from app.auth.jwt import solo_admin
 from typing import List
 
-router = APIRouter(prefix="/categorias", tags=["categorias"])
+router = APIRouter(
+    prefix="/categorias", 
+    tags=["categorias"]
+)
 
 # Listar todas las categorías
 @router.get("/", response_model=List[CategoriaOut])

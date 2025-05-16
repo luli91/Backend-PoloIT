@@ -6,7 +6,10 @@ from app.schemas.estado import EstadoCreate, EstadoOut
 from app.auth.jwt import solo_admin
 from typing import List
 
-router = APIRouter(prefix="/estados", tags=["estados"])
+router = APIRouter(
+    prefix="/estados", 
+    tags=["estados"]
+)
 
 # Listar todos los estados
 @router.get("/", response_model=List[EstadoOut])
