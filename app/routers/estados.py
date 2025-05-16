@@ -8,10 +8,12 @@ from typing import List
 
 router = APIRouter(prefix="/estados", tags=["estados"])
 
+# Listar todos los estados
 @router.get("/", response_model=List[EstadoOut])
 def listar_estados(db: Session = Depends(get_db)):
     return db.query(Estado).all()
 
+# Agregar un nuevo estado
 @router.post("/", response_model=EstadoOut)
 def crear_estado(
     estado: EstadoCreate,
@@ -24,6 +26,7 @@ def crear_estado(
     db.refresh(nuevo)
     return nuevo
 
+# Modificar un estado existente
 @router.put("/{estado_id}", response_model=EstadoOut)
 def actualizar_estado(
     estado_id: int,
@@ -39,6 +42,7 @@ def actualizar_estado(
     db.refresh(estado)
     return estado
 
+# Borrar un estado existente
 @router.delete("/{estado_id}")
 def eliminar_estado(
     estado_id: int,

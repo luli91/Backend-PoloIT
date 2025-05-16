@@ -8,10 +8,12 @@ from typing import List
 
 router = APIRouter(prefix="/categorias", tags=["categorias"])
 
+# Listar todas las categorías
 @router.get("/", response_model=List[CategoriaOut])
 def listar_categorias(db: Session = Depends(get_db)):
     return db.query(Categoria).all()
 
+# Crear una nueva categoría
 @router.post("/", response_model=CategoriaOut)
 def crear_categoria(
     categoria: CategoriaCreate,
@@ -24,6 +26,7 @@ def crear_categoria(
     db.refresh(nueva)
     return nueva
 
+# Modificar una categoría existente
 @router.put("/{categoria_id}", response_model=CategoriaOut)
 def actualizar_categoria(
     categoria_id: int,
@@ -39,6 +42,7 @@ def actualizar_categoria(
     db.refresh(categoria)
     return categoria
 
+# Eliminar una categoría
 @router.delete("/{categoria_id}")
 def eliminar_categoria(
     categoria_id: int,
