@@ -10,9 +10,11 @@ class Donacion(Base):
     id = Column(Integer, primary_key=True, index=True)
     descripcion = Column(String, nullable=False)    
     cantidad = Column(Integer, nullable=False)
+    fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    
     usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
     categoria_id = Column(Integer, ForeignKey("categoria.id"), nullable=False)
-    fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    estado_id = Column(Integer, ForeignKey("estado.id"), nullable=False) 
 
     publicaciones = relationship("Publicacion", back_populates="donacion")
     usuario = relationship("Usuario", back_populates="donaciones")
