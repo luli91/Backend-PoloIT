@@ -2,7 +2,11 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
-from models.donacion import Donacion
+
+from app.models.donacion import Donacion
+from app.models.estado import Estado
+
+
 
 class Publicacion(Base):
     __tablename__ = "publicacion"
