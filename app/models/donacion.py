@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 from app.database import Base
 
@@ -18,3 +19,7 @@ class Donacion(Base):
     publicaciones = relationship("Publicacion", back_populates="donacion")
     usuario = relationship("Usuario", back_populates="donaciones")
     categoria = relationship("Categoria", back_populates="donaciones")
+    
+    @hybrid_property
+    def tiene_publicacion(self) -> bool:
+        return len(self.publicaciones) > 0
