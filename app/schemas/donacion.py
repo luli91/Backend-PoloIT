@@ -11,7 +11,6 @@ class DonacionBase(BaseModel):
     descripcion: str
     cantidad: int
     categoria_id: int
-    estado_id: Optional[int] = None 
 
 # Para crear una donación
 class DonacionCreate(DonacionBase):

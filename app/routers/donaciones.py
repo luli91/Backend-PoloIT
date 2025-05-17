@@ -4,10 +4,9 @@ from typing import List
 
 from app.database import get_db
 from app.models.donacion import Donacion
-from app.models.estado import Estado
 from app.schemas.donacion import DonacionCreate, DonacionOut, DonacionWithPublicaciones
 from app.models.usuario import Usuario
-from app.auth.jwt import obtener_usuario_actual, solo_admin
+from app.auth.jwt import obtener_usuario_actual
 
 router = APIRouter(
     prefix="/donaciones",
@@ -39,28 +38,18 @@ def obtener_donacion_completa(donacion_id: int, db: Session = Depends(get_db)):
 
     return donacion
 
-# Crear una nueva donación con estado Pendiente por default
+# Crear una nueva donación
 @router.post("/", response_model=DonacionOut, status_code=status.HTTP_201_CREATED)
 def crear_donacion(
     donacion: DonacionCreate,
     usuario_actual: Usuario = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db)
 ):
-    estado_id = donacion.estado_id
-    
-    # Si no se proporciona estado_id, usar "Pendiente"
-    if estado_id is None:
-        estado = db.query(Estado).filter(Estado.nombre == "Pendiente").first()
-        if not estado:
-            raise HTTPException(status_code=500, detail="No se encuentra el estado 'Pendiente'")
-        estado_id = estado.id
-
     nueva_donacion = Donacion(
         descripcion=donacion.descripcion,
         cantidad=donacion.cantidad,
         categoria_id=donacion.categoria_id,
-        usuario_id=usuario_actual.id,
-        estado_id=estado_id
+        usuario_id=usuario_actual.id
     )
     db.add(nueva_donacion)
     db.commit()
@@ -83,8 +72,9 @@ def actualizar_donacion(
     if donacion.usuario_id != usuario_actual.id:
         raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta donación")
 
-    for campo, valor in datos.dict().items():
-        setattr(donacion, campo, valor)
+    donacion.descripcion = datos.descripcion
+    donacion.cantidad = datos.cantidad
+    donacion.categoria_id = datos.categoria_id
 
     db.commit()
     db.refresh(donacion)
