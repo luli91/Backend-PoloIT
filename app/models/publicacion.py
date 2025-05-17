@@ -8,7 +8,7 @@ class Publicacion(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     mensaje = Column(String, nullable=False)
-    donacion_id = Column(Integer, ForeignKey("donacion.id"), nullable=False)
+    donacion_id = Column(Integer, ForeignKey("donacion.id"), nullable=False, unique=True)
     usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
     estado_id = Column(Integer, ForeignKey("estado.id"), nullable=False)
     imagen_url = Column(String, nullable=True)

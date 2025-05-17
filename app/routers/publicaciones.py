@@ -5,6 +5,7 @@ from typing import List
 from app.database import get_db
 from app.models.publicacion import Publicacion
 from app.models.estado import Estado
+from app.models.donacion import Donacion
 from app.schemas.publicacion import PublicacionCreate, PublicacionOut, PublicacionEstadoUpdate
 from app.auth.jwt import obtener_usuario_actual
 from app.models.usuario import Usuario
@@ -21,6 +22,21 @@ def crear_publicacion(
     usuario_actual: Usuario = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db)
 ):
+    # Validar si la donación existe y pertenece al usuario
+    donacion = db.query(Donacion).filter(
+        Donacion.id == datos.donacion_id,
+        Donacion.usuario_id == usuario_actual.id
+    ).first()
+
+    if not donacion:
+        raise HTTPException(status_code=404, detail="Donación no encontrada o no es tuya")    
+    
+     # Validar si ya tiene publicación
+    existente = db.query(Publicacion).filter(Publicacion.donacion_id == datos.donacion_id).first()
+    if existente:
+        raise HTTPException(status_code=400, detail="Esta donación ya tiene una publicación. Podés editarla.")
+ 
+    # Crear publicacion
     estado = db.query(Estado).filter(Estado.nombre == "Activo").first()
     if not estado:
         raise HTTPException(status_code=500, detail="Estado 'Activo' no encontrado")
@@ -50,6 +66,22 @@ def obtener_publicacion(publicacion_id: int, db: Session = Depends(get_db)):
 
     if not publicacion:
         raise HTTPException(status_code=404, detail="Publicación no encontrada")
+
+    return publicacion
+
+# Obtener una publicacion por donación
+@router.get("/por-donacion/{donacion_id}", response_model=PublicacionOut)
+def obtener_por_donacion(
+    donacion_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: Usuario = Depends(obtener_usuario_actual)
+):
+    publicacion = db.query(Publicacion).filter(
+        Publicacion.donacion_id == donacion_id
+    ).first()
+
+    if not publicacion:
+        raise HTTPException(status_code=404, detail="No hay publicación para esta donación")
 
     return publicacion
 
