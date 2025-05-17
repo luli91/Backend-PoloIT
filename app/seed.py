@@ -19,18 +19,17 @@ def cargar_categorias(db: Session):
     db.commit()
 
 def cargar_estados(db: Session):
-    print("💡 Ejecutando seed de estados...")  # 👈 DEBUG
+    print("💡 Ejecutando seed de estados...")  # DEBUG
     ya_existen = db.query(Estado).count()
     if ya_existen > 0:
-        print("✅ Estados ya existen, no se vuelve a cargar.")
+        print("Estados ya existen, no se vuelve a cargar.")
         return
 
-    estados = ["Pendiente", "Entregado", "Cancelado"]
-    for nombre in estados:
-        db.add(Estado(nombre=nombre))
+    for estado_enum in EstadoNombreEnum:
+        db.add(Estado(nombre=estado_enum.value))
 
     db.commit()
-    print("✅ Estados cargados correctamente.")
+    print("Estados cargados correctamente.")
 
 # Permite ejecutar el seed directamente con: python app/seed.py
 if __name__ == "__main__":
