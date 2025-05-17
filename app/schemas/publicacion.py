@@ -9,11 +9,11 @@ class PublicacionCreate(BaseModel):
 class PublicacionOut(BaseModel):
     id: int
     mensaje: str
-    estado: EstadoNombre
+    estado: EstadoNombreEnum
     
     model_config = {
         "from_attributes": True
     }
 
 class PublicacionEstadoUpdate(BaseModel):
-    estado: EstadoNombre
+    estado: EstadoNombreEnum
