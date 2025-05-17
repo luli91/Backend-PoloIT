@@ -20,8 +20,8 @@ app = FastAPI(
 # Ejecutar seeds al iniciar (solo si las tablas están vacías)
 @app.on_event("startup")
 def inicializar_datos():
-    print("Ejecutando seeds si hace falta...")
     from app.database import SessionLocal
+    print("Ejecutando seeds si hace falta...")
     db = SessionLocal()
     cargar_categorias(db)
     cargar_estados(db)
