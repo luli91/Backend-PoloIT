@@ -6,6 +6,7 @@ from app.database import get_db
 from app.models.donacion import Donacion
 from app.schemas.donacion import DonacionCreate, DonacionOut, DonacionWithPublicaciones
 from app.models.usuario import Usuario
+from app.models.estado import Estado
 from app.auth.jwt import obtener_usuario_actual, solo_admin
 
 router = APIRouter(
@@ -19,7 +20,8 @@ def listar_donaciones(db: Session = Depends(get_db)):
     return db.query(Donacion)\
         .options(
             selectinload(Donacion.usuario),
-            selectinload(Donacion.categoria)
+            selectinload(Donacion.categoria),
+            selectinload(Donacion.estado)
         ).all()
 
 # Ver detalles de una donación
@@ -29,7 +31,8 @@ def obtener_donacion_completa(donacion_id: int, db: Session = Depends(get_db)):
         .options(
             selectinload(Donacion.publicaciones),
             selectinload(Donacion.usuario),
-            selectinload(Donacion.categoria)
+            selectinload(Donacion.categoria),
+            selectinload(Donacion.estado)
         )\
         .filter(Donacion.id == donacion_id).first()
 
@@ -45,6 +48,15 @@ def crear_donacion(
     usuario_actual: Usuario = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db)
 ):
+    # Validar que se haya recibido estado_id
+    if not donacion.estado_id:
+        raise HTTPException(status_code=400, detail="estado_id es obligatorio")
+
+    # Validar que el estado_id exista
+    estado = db.query(Estado).filter(Estado.id == donacion.estado_id).first()
+    if not estado:
+        raise HTTPException(status_code=404, detail="El estado no existe")
+
     nueva_donacion = Donacion(
         **donacion.dict(),
         usuario_id=usuario_actual.id
@@ -69,6 +81,14 @@ def actualizar_donacion(
 
     if donacion.usuario_id != usuario_actual.id:
         raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta donación")
+
+    # Validar estado_id al actualizar
+    if not datos.estado_id:
+        raise HTTPException(status_code=400, detail="estado_id es obligatorio")
+
+    estado = db.query(Estado).filter(Estado.id == datos.estado_id).first()
+    if not estado:
+        raise HTTPException(status_code=404, detail="El estado no existe")
 
     for campo, valor in datos.dict().items():
         setattr(donacion, campo, valor)

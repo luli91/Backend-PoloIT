@@ -6,17 +6,18 @@ from app.schemas.usuario import UsuarioOut
 from app.schemas.categoria import CategoriaOut
 from app.schemas.publicacion import PublicacionOut
 
-# Base para creacion
+# Base para creación
 class DonacionBase(BaseModel):
     descripcion: str
     cantidad: int
     categoria_id: int
+    estado_id: int 
 
-# Para crear
+# Para crear una donación
 class DonacionCreate(DonacionBase):
     pass
 
-# Respuesta básica con relaciones cargadas
+# Respuesta básica con usuario y categoría
 class DonacionOut(DonacionBase):
     id: int
     fecha_creacion: datetime
@@ -27,7 +28,7 @@ class DonacionOut(DonacionBase):
         "from_attributes": True
     }
 
-# Para incluir publicaciones   
+# Respuesta extendida con publicaciones
 class DonacionWithPublicaciones(DonacionOut):
     publicaciones: List[PublicacionOut]
 
