@@ -1,13 +1,9 @@
-from enum import Enum
 from pydantic import BaseModel
+from app.models.estado import EstadoNombreEnum
 
-class EstadoNombre(str, Enum):
-    pendiente = "Pendiente"
-    entregado = "Entregado"
-    cancelado = "Cancelado"
-
+# Enum importado del modelo
 class EstadoBase(BaseModel):
-    nombre: EstadoNombre
+    nombre: EstadoNombreEnum
 
 class EstadoCreate(EstadoBase):
     pass

@@ -16,8 +16,8 @@ def cargar_categorias(db: Session):
 
 def cargar_estados(db: Session):
     for estado_enum in EstadoNombreEnum:
-        ya_existe = db.query(Estado).filter_by(nombre=estado_enum).first()
+        ya_existe = db.query(Estado).filter_by(nombre=estado_enum.value).first()
         if not ya_existe:
-            db.add(Estado(nombre=estado_enum))
+            db.add(Estado(nombre=estado_enum.value))
     
     db.commit()
