@@ -7,14 +7,13 @@ from app.models.ubicacion import Ubicacion
 from app.models.usuario import Usuario
 from app.schemas.ubicacion import UbicacionCreate, UbicacionOut
 from app.auth.jwt import obtener_usuario_actual
-from app.utils.validaciones import validar_provincia
 
 router = APIRouter(
     prefix="/ubicaciones",
     tags=["ubicaciones"]
 )
 
-# Encontrar donaciones cercanas
+# Encontrar ubicaciones cercanas
 @router.get("/", response_model=List[UbicacionOut])
 def buscar_ubicaciones(
     ciudad: Optional[str] = None,
@@ -55,17 +54,11 @@ def crear_ubicacion(
     if usuario.ubicacion_id:
         raise HTTPException(status_code=400, detail="El usuario ya tiene una ubicación")
 
-    if not validar_provincia(ubicacion.provincia):
-        raise HTTPException(status_code=400, detail="Provincia inválida o mal escrita")
-
-    # Normalizar (capitalizar)
-    provincia_normalizada = ubicacion.provincia.strip().title()
-
     nueva = Ubicacion(
-        direccion=ubicacion.direccion,
+        direccion=ubicacion.direccion.strip(),
         ciudad=ubicacion.ciudad.strip(),
         codigo_postal=ubicacion.codigo_postal.strip(),
-        provincia=provincia_normalizada
+        provincia=ubicacion.provincia.value  # Usamos el string del Enum
     )
     
     db.add(nueva)
@@ -93,15 +86,8 @@ def actualizar_ubicacion(
     if not ubicacion:
         raise HTTPException(status_code=404, detail="Ubicación no encontrada")
 
-    # Validar provincia
-    if not validar_provincia(datos.provincia):
-        raise HTTPException(status_code=400, detail="Provincia inválida o mal escrita")
-
-    # Normalizar nombre de provincia
-    datos.provincia = datos.provincia.strip().title()
-
     for campo, valor in datos.dict().items():
-        setattr(ubicacion, campo, valor)
+        setattr(ubicacion, campo, valor.value if campo == "provincia" else valor.strip())
 
     db.commit()
     db.refresh(ubicacion)
