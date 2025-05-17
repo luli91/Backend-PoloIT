@@ -22,7 +22,7 @@ class DonacionOut(DonacionBase):
     fecha_creacion: datetime
     usuario: UsuarioOut
     categoria: CategoriaOut
-    tiene_publicacion: bool = False
+    tiene_publicacion: bool
 
     model_config = {
         "from_attributes": True
