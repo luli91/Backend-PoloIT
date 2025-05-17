@@ -1,7 +1,6 @@
 from pydantic import BaseModel
-from app.models.estado import EstadoNombreEnum
+from app.utils.estado_nombre import EstadoNombreEnum
 
-# Enum importado del modelo
 class EstadoBase(BaseModel):
     nombre: EstadoNombreEnum
 

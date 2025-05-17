@@ -1,15 +1,19 @@
 from sqlalchemy.orm import Session
-from app.models.estado import Estado, EstadoNombreEnum
+from app.models.estado import Estado
 from app.models.categoria import Categoria
+from app.utils.estado_nombre import EstadoNombreEnum
 from app.database import SessionLocal
 
 def cargar_estados(db: Session):
-    print("Cargando estados...")
-    if db.query(Estado).count() > 0:
-        print("Ya existen estados, se omite carga.")
+    print("Ejecutando seed de estados...")
+    ya_existen = db.query(Estado).count()
+    if ya_existen > 0:
+        print("Estados ya existen, no se vuelve a cargar.")
         return
+
     for estado in EstadoNombreEnum:
-        db.add(Estado(nombre=estado))
+        db.add(Estado(nombre=estado.value))
+
     db.commit()
     print("Estados cargados correctamente.")
 
