@@ -22,9 +22,10 @@ from app.seed import cargar_categorias, cargar_estados
 
 @app.on_event("startup")
 def inicializar_datos():
-    print("SEED_ACTIVO =", os.getenv("SEED_ACTIVO"))
-    
+    print("SEED_ACTIVO =", os.getenv("SEED_ACTIVO"))  # DEBUG VISUAL
+
     if os.getenv("SEED_ACTIVO") == "1":
+        print("Ejecutando seeds iniciales...")  # CONFIRMA QUE EL IF ENTRA
         from app.database import SessionLocal
         db = SessionLocal()
         cargar_categorias(db)
