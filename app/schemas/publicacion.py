@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from app.utils.estado_nombre import EstadoNombre
+from app.utils.estado_nombre import EstadoNombreEnum
 
 class PublicacionCreate(BaseModel):
     mensaje: str
