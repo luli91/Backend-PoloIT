@@ -2,10 +2,10 @@ from pydantic import BaseModel
 from app.utils.provincias import ProvinciaEnum
 
 class UbicacionBase(BaseModel):
-    provincia: ProvinciaEnum
-    ciudad: str
     direccion: str
+    ciudad: str
     codigo_postal: str
+    provincia: ProvinciaEnum
 
 class UbicacionCreate(UbicacionBase):
     pass
