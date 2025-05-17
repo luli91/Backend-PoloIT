@@ -3,7 +3,6 @@ from app.utils.provincias import ProvinciaEnum
 
 class UbicacionBase(BaseModel):
     provincia: ProvinciaEnum
-    ciudad:str
 
 class UbicacionCreate(UbicacionBase):
     pass
