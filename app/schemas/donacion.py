@@ -22,12 +22,13 @@ class DonacionOut(DonacionBase):
     fecha_creacion: datetime
     usuario: UsuarioOut
     categoria: CategoriaOut
+    tiene_publicacion: bool = False
 
     model_config = {
         "from_attributes": True
     }
 
-# Respuesta extendida con publicaciones
+# Donación + publicaciones (para detalles)
 class DonacionWithPublicaciones(DonacionOut):
     publicaciones: List[PublicacionOut]
 

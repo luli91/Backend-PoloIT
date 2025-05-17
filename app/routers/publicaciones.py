@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
 from typing import List
 
@@ -129,3 +129,23 @@ def actualizar_publicacion_por_donacion(
     db.commit()
     db.refresh(publicacion)
     return publicacion
+
+# Eliminar una publicacion
+@router.delete("/{publicacion_id}")
+def eliminar_publicacion(
+    publicacion_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: Usuario = Depends(obtener_usuario_actual)
+):
+    publicacion = db.query(Publicacion).filter(Publicacion.id == publicacion_id).first()
+
+    if not publicacion:
+        raise HTTPException(status_code=404, detail="Publicación no encontrada")
+
+    if publicacion.usuario_id != usuario_actual.id and usuario_actual.rol != "admin":
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar esta publicación")
+
+    db.delete(publicacion)
+    db.commit()
+
+    return {"ok": True, "mensaje": "Publicación eliminada"}

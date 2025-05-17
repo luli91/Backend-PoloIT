@@ -16,11 +16,18 @@ router = APIRouter(
 # Listar todas las donaciones
 @router.get("/", response_model=List[DonacionOut])
 def listar_donaciones(db: Session = Depends(get_db)):
-    return db.query(Donacion)\
+    donaciones = db.query(Donacion)\
         .options(
             selectinload(Donacion.usuario),
-            selectinload(Donacion.categoria)
+            selectinload(Donacion.categoria),
+            selectinload(Donacion.publicaciones)
         ).all()
+
+    for donacion in donaciones:
+        # Campo adicional para indicar si ya fue publicada
+        donacion.tiene_publicacion = len(donacion.publicaciones) > 0
+
+    return donaciones
 
 # Ver detalles de una donación
 @router.get("/{donacion_id}", response_model=DonacionWithPublicaciones)
@@ -54,6 +61,7 @@ def crear_donacion(
     db.add(nueva_donacion)
     db.commit()
     db.refresh(nueva_donacion)
+    nueva_donacion.tiene_publicacion = False  # Inicialmente no tiene
     return nueva_donacion
 
 # Actualizar una donación propia
@@ -78,6 +86,8 @@ def actualizar_donacion(
 
     db.commit()
     db.refresh(donacion)
+
+    donacion.tiene_publicacion = len(donacion.publicaciones) > 0
     return donacion
 
 # Eliminar una donación propia
@@ -87,13 +97,18 @@ def eliminar_donacion(
     usuario_actual: Usuario = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db)
 ):
-    donacion = db.query(Donacion).filter(Donacion.id == donacion_id).first()
+    donacion = db.query(Donacion)\
+        .options(selectinload(Donacion.publicaciones))\
+        .filter(Donacion.id == donacion_id).first()
 
     if not donacion:
         raise HTTPException(status_code=404, detail="Donación no encontrada")
 
     if donacion.usuario_id != usuario_actual.id and usuario_actual.rol != "admin":
         raise HTTPException(status_code=403, detail="No tienes permiso para eliminar esta donación")
+
+    if len(donacion.publicaciones) > 0:
+        raise HTTPException(status_code=400, detail="No se puede eliminar una donación que ya tiene publicación")
 
     db.delete(donacion)
     db.commit()
