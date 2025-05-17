@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from app.schemas.estado import EstadoOut
+from app.utils.estado_nombre import EstadoNombre
 
 class PublicacionCreate(BaseModel):
     mensaje: str
@@ -9,8 +9,11 @@ class PublicacionCreate(BaseModel):
 class PublicacionOut(BaseModel):
     id: int
     mensaje: str
-    estado: EstadoOut
-
+    estado: EstadoNombre
+    
     model_config = {
         "from_attributes": True
     }
+
+class PublicacionEstadoUpdate(BaseModel):
+    estado: EstadoNombre
