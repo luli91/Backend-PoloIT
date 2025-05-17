@@ -4,9 +4,9 @@ from app.database import Base
 from enum import Enum
 
 class EstadoNombreEnum(str, Enum):
-    activo = "Activo"
-    entregado = "Entregado"
-    cancelado = "Cancelado"
+    Activo = "Activo"
+    Entregado = "Entregado"
+    Cancelado = "Cancelado"
 
 class Estado(Base):
     __tablename__ = "estado"
