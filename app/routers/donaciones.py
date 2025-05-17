@@ -4,9 +4,9 @@ from typing import List
 
 from app.database import get_db
 from app.models.donacion import Donacion
+from app.models.estado import Estado
 from app.schemas.donacion import DonacionCreate, DonacionOut, DonacionWithPublicaciones
 from app.models.usuario import Usuario
-from app.models.estado import Estado
 from app.auth.jwt import obtener_usuario_actual, solo_admin
 
 router = APIRouter(
@@ -20,8 +20,7 @@ def listar_donaciones(db: Session = Depends(get_db)):
     return db.query(Donacion)\
         .options(
             selectinload(Donacion.usuario),
-            selectinload(Donacion.categoria),
-            selectinload(Donacion.estado)
+            selectinload(Donacion.categoria)
         ).all()
 
 # Ver detalles de una donación
@@ -31,8 +30,7 @@ def obtener_donacion_completa(donacion_id: int, db: Session = Depends(get_db)):
         .options(
             selectinload(Donacion.publicaciones),
             selectinload(Donacion.usuario),
-            selectinload(Donacion.categoria),
-            selectinload(Donacion.estado)
+            selectinload(Donacion.categoria)
         )\
         .filter(Donacion.id == donacion_id).first()
 
@@ -41,25 +39,28 @@ def obtener_donacion_completa(donacion_id: int, db: Session = Depends(get_db)):
 
     return donacion
 
-# Crear una nueva donación
+# Crear una nueva donación con estado Pendiente por default
 @router.post("/", response_model=DonacionOut, status_code=status.HTTP_201_CREATED)
 def crear_donacion(
     donacion: DonacionCreate,
     usuario_actual: Usuario = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db)
 ):
-    # Validar que se haya recibido estado_id
-    if not donacion.estado_id:
-        raise HTTPException(status_code=400, detail="estado_id es obligatorio")
-
-    # Validar que el estado_id exista
-    estado = db.query(Estado).filter(Estado.id == donacion.estado_id).first()
-    if not estado:
-        raise HTTPException(status_code=404, detail="El estado no existe")
+    estado_id = donacion.estado_id
+    
+    # Si no se proporciona estado_id, usar "Pendiente"
+    if estado_id is None:
+        estado = db.query(Estado).filter(Estado.nombre == "Pendiente").first()
+        if not estado:
+            raise HTTPException(status_code=500, detail="No se encuentra el estado 'Pendiente'")
+        estado_id = estado.id
 
     nueva_donacion = Donacion(
-        **donacion.dict(),
-        usuario_id=usuario_actual.id
+        descripcion=donacion.descripcion,
+        cantidad=donacion.cantidad,
+        categoria_id=donacion.categoria_id,
+        usuario_id=usuario_actual.id,
+        estado_id=estado_id
     )
     db.add(nueva_donacion)
     db.commit()
@@ -81,14 +82,6 @@ def actualizar_donacion(
 
     if donacion.usuario_id != usuario_actual.id:
         raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta donación")
-
-    # Validar estado_id al actualizar
-    if not datos.estado_id:
-        raise HTTPException(status_code=400, detail="estado_id es obligatorio")
-
-    estado = db.query(Estado).filter(Estado.id == datos.estado_id).first()
-    if not estado:
-        raise HTTPException(status_code=404, detail="El estado no existe")
 
     for campo, valor in datos.dict().items():
         setattr(donacion, campo, valor)

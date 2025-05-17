@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from app.schemas.usuario import UsuarioOut
 from app.schemas.categoria import CategoriaOut
@@ -11,7 +11,7 @@ class DonacionBase(BaseModel):
     descripcion: str
     cantidad: int
     categoria_id: int
-    estado_id: int 
+    estado_id: Optional[int] = None 
 
 # Para crear una donación
 class DonacionCreate(DonacionBase):
