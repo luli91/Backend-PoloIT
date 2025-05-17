@@ -29,23 +29,30 @@ def registrar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     if usuario_existente:
         raise HTTPException(status_code=400, detail="El email ya está registrado")
     
-    # Validar que la ubicación exista
-    ubicacion = db.query(Ubicacion).filter(Ubicacion.id == usuario.ubicacion_id).first()
-    if not ubicacion:
-        raise HTTPException(status_code=400, detail="Ubicación inválida")    
+    # Crear ubicación primero
+    nueva_ubicacion = Ubicacion(
+        direccion=usuario.direccion,
+        codigo_postal=usuario.codigo_postal,
+        ciudad=usuario.ciudad,
+        provincia=usuario.provincia
+    )
+    db.add(nueva_ubicacion)
+    db.commit()
+    db.refresh(nueva_ubicacion)
 
+    # Crear usuario usando ubicacion_id generado
     nuevo_usuario = Usuario(
         nombre=usuario.nombre,
         email=usuario.email,
         telefono=usuario.telefono,
-        rol=usuario.rol,
         password_hash=hash_password(usuario.password),
-        ubicacion_id=usuario.ubicacion_id,
+        rol=usuario.rol,
+        ubicacion_id=nueva_ubicacion.id
     )
-
     db.add(nuevo_usuario)
     db.commit()
     db.refresh(nuevo_usuario)
+
     return nuevo_usuario
 
 # Login de usuario (devuelve token JWT)
