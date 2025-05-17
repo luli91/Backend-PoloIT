@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,27 +9,23 @@ from app.models import usuario, donacion, categoria, estado, ubicacion, publicac
 from app.routers import usuarios, donaciones, publicaciones, categorias, estados, ubicaciones, ping
 from app.seed import cargar_categorias, cargar_estados
 
-# Crear tablas en la base de datos (solo si no usás Alembic)
+# Crear tablas (solo si no usamos Alembic)
 Base.metadata.create_all(bind=engine)
-
-# Activar o no el seed desde variable de entorno
-SEED_ACTIVO = os.getenv("SEED_ACTIVO", "0") == "1"
-print("Variable SEED_ACTIVO:", SEED_ACTIVO)
 
 app = FastAPI(
     title="API Donaciones",
     version="0.1.0"
 )
 
+# Ejecutar seeds al iniciar (solo si las tablas están vacías)
 @app.on_event("startup")
 def inicializar_datos():
-    if SEED_ACTIVO:
-        print("Ejecutando seeds iniciales...")
-        from app.database import SessionLocal
-        db = SessionLocal()
-        cargar_categorias(db)
-        cargar_estados(db)
-        db.close()
+    print("Ejecutando seeds si hace falta...")
+    from app.database import SessionLocal
+    db = SessionLocal()
+    cargar_categorias(db)
+    cargar_estados(db)
+    db.close()
 
 # Configurar CORS
 app.add_middleware(
