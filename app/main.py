@@ -30,7 +30,7 @@ def inicializar_datos():
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Cambiar esto en producción
+    allow_origins=["https://frontend-poloitv2-production.up.railway.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
