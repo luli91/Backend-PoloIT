@@ -21,7 +21,8 @@ app = FastAPI(
 # ✅ Middleware para redirigir HTTP a HTTPS
 @app.middleware("http")
 async def redirect_http_to_https(request: Request, call_next):
-    if request.url.scheme == "http":
+    proto = request.headers.get("x-forwarded-proto")
+    if proto == "http":
         https_url = request.url.replace(scheme="https")
         return RedirectResponse(url=str(https_url))
     return await call_next(request)
