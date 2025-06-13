@@ -33,9 +33,9 @@ def crear_publicacion(
     if existente:
         raise HTTPException(status_code=400, detail="Esta donación ya tiene una publicación. Podés editarla.")
 
-    estado = db.query(Estado).filter(Estado.nombre == "Activo").first()
+    estado = db.query(Estado).filter(Estado.nombre == "Pendiente").first()
     if not estado:
-        raise HTTPException(status_code=500, detail="Estado 'Activo' no encontrado")
+        raise HTTPException(status_code=500, detail="Estado 'Pendiente' no encontrado")
 
     nueva = Publicacion(
         mensaje=datos.mensaje,

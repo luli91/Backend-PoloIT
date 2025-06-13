@@ -4,6 +4,7 @@ from app.models.categoria import Categoria
 from app.utils.estado_nombre import EstadoNombreEnum
 from app.database import SessionLocal
 
+
 def cargar_estados(db: Session):
     print("Ejecutando seed de estados...")
     ya_existen = db.query(Estado).count()
@@ -11,8 +12,15 @@ def cargar_estados(db: Session):
         print("Estados ya existen, no se vuelve a cargar.")
         return
 
-    for estado in EstadoNombreEnum:
-        db.add(Estado(nombre=estado.value))
+    # Usar el enum directamente, no su valor
+    estados = [
+        Estado(nombre=EstadoNombreEnum.Pendiente),
+        Estado(nombre=EstadoNombreEnum.Entregado),
+        Estado(nombre=EstadoNombreEnum.Cancelado)
+    ]
+
+    for estado in estados:
+        db.add(estado)
 
     db.commit()
     print("Estados cargados correctamente.")
