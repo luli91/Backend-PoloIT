@@ -1,6 +1,6 @@
 from enum import Enum
 
 class EstadoNombreEnum(str, Enum):
-    Activo = "Activo"
+    Pendiente = "Pendiente"
     Entregado = "Entregado"
     Cancelado = "Cancelado"

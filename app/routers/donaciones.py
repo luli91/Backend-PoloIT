@@ -23,9 +23,7 @@ def listar_donaciones(db: Session = Depends(get_db)):
             selectinload(Donacion.publicaciones)
         ).all()
 
-    for donacion in donaciones:
-        # Campo adicional para indicar si ya fue publicada
-        donacion.tiene_publicacion = len(donacion.publicaciones) > 0
+
 
     return donaciones
 
@@ -61,7 +59,8 @@ def crear_donacion(
     db.add(nueva_donacion)
     db.commit()
     db.refresh(nueva_donacion)
-    nueva_donacion.tiene_publicacion = False  # Inicialmente no tiene
+    # Eliminar esta línea ya que tiene_publicacion se calcula automáticamente
+    # nueva_donacion.tiene_publicacion = False  # Inicialmente no tiene
     return nueva_donacion
 
 # Actualizar una donación propia

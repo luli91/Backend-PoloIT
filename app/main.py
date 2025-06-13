@@ -45,7 +45,7 @@ app.include_router(categorias)
 app.include_router(estados)
 app.include_router(ubicaciones)
 
-# Endpoint raíz
+# ✅ Endpoint raíz
 @app.get("/", tags=["Root"])
 def read_root():
     return {"message": "API Donaciones lista"}
