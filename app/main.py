@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
-
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from app.database import Base, engine
@@ -62,7 +61,6 @@ app = FastAPI(
     },
 )
 
-
 # Personalizar OpenAPI para incluir JWT en la documentación
 def custom_openapi():
     if app.openapi_schema:
@@ -123,7 +121,6 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 # Ejecutar seeds al iniciar (solo si las tablas están vacías)
-
 @app.on_event("startup")
 def inicializar_datos():
     from app.database import SessionLocal
@@ -133,7 +130,16 @@ def inicializar_datos():
     cargar_estados(db)
     db.close()
 
-# ✅ Incluir todos los routers
+# Configurar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Cambiar esto en producción
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Incluir todos los routers
 app.include_router(ping)
 app.include_router(usuarios)
 app.include_router(donaciones)
