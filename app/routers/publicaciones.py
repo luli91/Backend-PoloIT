@@ -51,8 +51,19 @@ def crear_publicacion(
 # Listar todas las publicaciones
 @router.get("/", response_model=List[PublicacionOut])
 def listar_publicaciones(db: Session = Depends(get_db)):
-    return db.query(Publicacion).options(selectinload(Publicacion.estado)).all()
-
+    publicaciones = db.query(Publicacion).options(selectinload(Publicacion.estado)).all()
+    return [
+        PublicacionOut(
+            id=p.id,
+            mensaje=p.mensaje,
+            donacion_id=p.donacion_id,
+            usuario_id=p.usuario_id,
+            estado=p.estado.nombre,  # << esto es clave
+            imagen_url=p.imagen_url,
+            visible=p.visible,
+            fecha_publicacion=p.fecha_publicacion
+        ) for p in publicaciones
+    ]
 # Obtener una publicación por ID
 @router.get("/{publicacion_id}", response_model=PublicacionOut)
 def obtener_publicacion(publicacion_id: int, db: Session = Depends(get_db)):
