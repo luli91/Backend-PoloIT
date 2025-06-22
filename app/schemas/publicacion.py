@@ -12,10 +12,13 @@ class PublicacionOut(BaseModel):
     id: int
     mensaje: str
     estado: EstadoNombreEnum
+    # donacion_id: Optional[int]
+    # usuario_id: Optional[int]
+    # imagen_url: Optional[str]
+    # visible: Optional[bool]
+    # fecha_publicacion: Optional[datetime]
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 # Cambiar unicamente el estado
 class PublicacionEstadoUpdate(BaseModel):
@@ -27,3 +30,5 @@ class PublicacionUpdate(BaseModel):
     estado: Optional[EstadoNombreEnum] = None
     imagen_url: Optional[str] = None
     visible: Optional[bool] = None
+
+
