@@ -9,4 +9,4 @@ class Estado(Base):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(Enum(EstadoNombreEnum), nullable=False)
 
-    publicaciones = relationship("Publicacion", back_populates="estado")
+    publicaciones = relationship("Publicacion", back_populates="estado_obj")
