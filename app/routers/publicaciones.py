@@ -6,8 +6,10 @@ from app.database import get_db
 from app.models.publicacion import Publicacion
 from app.models.estado import Estado
 from app.models.donacion import Donacion
+from app.schemas.paginacion import PaginatedResponse
 from app.schemas.publicacion import PublicacionCreate, PublicacionOut, PublicacionEstadoUpdate, PublicacionUpdate
 from app.auth.jwt import obtener_usuario_actual
+from app.schemas.publicacion_detalle import PublicacionDetalleOut
 from app.models.usuario import Usuario
 
 router = APIRouter(
@@ -46,33 +48,88 @@ def crear_publicacion(
     db.add(nueva)
     db.commit()
     db.refresh(nueva)
-    return nueva
+    return PublicacionOut.model_validate(nueva)
+
 
 # Listar todas las publicaciones
 @router.get("/", response_model=List[PublicacionOut])
 def listar_publicaciones(db: Session = Depends(get_db)):
-    publicaciones = db.query(Publicacion).options(selectinload(Publicacion.estado)).all()
-    return [
-        PublicacionOut(
-            id=p.id,
-            mensaje=p.mensaje,
-            donacion_id=p.donacion_id,
-            usuario_id=p.usuario_id,
-            estado=p.estado.nombre,  # << esto es clave
-            imagen_url=p.imagen_url,
-            visible=p.visible,
-            fecha_publicacion=p.fecha_publicacion
-        ) for p in publicaciones
-    ]
+    publicaciones = db.query(Publicacion).options(selectinload(Publicacion.estado_obj)).all()
+    return [PublicacionOut.model_validate(p) for p in publicaciones]
+
+
+# Obtener publicaciones con detalles:
+
+from app.schemas.publicacion_detalle import PublicacionDetalleOut
+
+@router.get("/detalle", response_model=PaginatedResponse[PublicacionDetalleOut])
+def publicaciones_con_paginacion(
+    page: int = 1,
+    per_page: int = 10,
+    db: Session = Depends(get_db)
+):
+    query = db.query(Publicacion).options(
+        selectinload(Publicacion.estado_obj),
+        selectinload(Publicacion.donacion).selectinload(Donacion.categoria),
+        selectinload(Publicacion.usuario).selectinload(Usuario.ubicacion)
+    )
+
+    total = query.count()
+    publicaciones = query.offset((page - 1) * per_page).limit(per_page).all()
+
+    return PaginatedResponse[PublicacionDetalleOut](
+        total=total,
+        page=page,
+        per_page=per_page,
+        pages=(total + per_page - 1) // per_page,
+        has_next=page * per_page < total,
+        has_prev=page > 1,
+        items=[PublicacionDetalleOut.model_validate(p) for p in publicaciones]
+    )
+
+# Obtener mis publicaciones:
+
+@router.get("/mis", response_model=PaginatedResponse[PublicacionDetalleOut])
+def mis_publicaciones_paginadas(
+    page: int = 1,
+    per_page: int = 10,
+    usuario_actual: Usuario = Depends(obtener_usuario_actual),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Publicacion).filter(
+        Publicacion.usuario_id == usuario_actual.id
+    ).options(
+        selectinload(Publicacion.estado_obj),
+        selectinload(Publicacion.donacion).selectinload(Donacion.categoria),
+        selectinload(Publicacion.usuario).selectinload(Usuario.ubicacion)
+    )
+
+    total = query.count()
+    publicaciones = query.offset((page - 1) * per_page).limit(per_page).all()
+
+    return PaginatedResponse[PublicacionDetalleOut](
+        total=total,
+        page=page,
+        per_page=per_page,
+        pages=(total + per_page - 1) // per_page,
+        has_next=page * per_page < total,
+        has_prev=page > 1,
+        items=[PublicacionDetalleOut.model_validate(p) for p in publicaciones]
+    )
+
+
 # Obtener una publicación por ID
 @router.get("/{publicacion_id}", response_model=PublicacionOut)
 def obtener_publicacion(publicacion_id: int, db: Session = Depends(get_db)):
     publicacion = db.query(Publicacion)\
-        .options(selectinload(Publicacion.estado))\
+        .options(selectinload(Publicacion.estado_obj))\
         .filter(Publicacion.id == publicacion_id).first()
+
     if not publicacion:
         raise HTTPException(status_code=404, detail="Publicación no encontrada")
-    return publicacion
+
+    return PublicacionOut.model_validate(publicacion)
+
 
 # Obtener una publicación por donación (1:1)
 @router.get("/por-donacion/{donacion_id}", response_model=PublicacionOut)
@@ -86,7 +143,7 @@ def obtener_por_donacion(
     ).first()
     if not publicacion:
         raise HTTPException(status_code=404, detail="No hay publicación para esta donación")
-    return publicacion
+    return PublicacionOut.model_validate(publicacion)
 
 # Cambiar el estado de una publicación (solo propio o admin)
 @router.put("/{publicacion_id}/estado", response_model=PublicacionOut)
@@ -110,7 +167,7 @@ def cambiar_estado_publicacion(
     publicacion.estado_id = nuevo_estado.id
     db.commit()
     db.refresh(publicacion)
-    return publicacion
+    return PublicacionOut.model_validate(publicacion)
 
 # Actualizar publicación por donación (si ya existe)
 @router.put("/por-donacion/{donacion_id}", response_model=PublicacionOut)
@@ -139,7 +196,7 @@ def actualizar_publicacion_por_donacion(
 
     db.commit()
     db.refresh(publicacion)
-    return publicacion
+    return PublicacionOut.model_validate(publicacion)
 
 # Eliminar una publicacion
 @router.delete("/{publicacion_id}")
@@ -160,3 +217,4 @@ def eliminar_publicacion(
     db.commit()
 
     return {"ok": True, "mensaje": "Publicación eliminada"}
+

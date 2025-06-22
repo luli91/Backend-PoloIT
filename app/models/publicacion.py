@@ -18,3 +18,10 @@ class Publicacion(Base):
     donacion = relationship("Donacion", back_populates="publicaciones")
     usuario = relationship("Usuario", back_populates="publicaciones")
     estado = relationship("Estado", back_populates="publicaciones")
+
+    @property
+    def estado(self) -> str:
+        return self.estado_obj.nombre  # ← nuevo nombre para evitar colisión con el campo original
+
+    # Relación original (renombrada)
+    estado_obj = relationship("Estado", back_populates="publicaciones")
