@@ -117,6 +117,7 @@ def mis_publicaciones_paginadas(
         items=[PublicacionDetalleOut.model_validate(p) for p in publicaciones]
     )
 
+
 # Obtener una publicación por ID
 @router.get("/{publicacion_id}", response_model=PublicacionOut)
 def obtener_publicacion(publicacion_id: int, db: Session = Depends(get_db)):
