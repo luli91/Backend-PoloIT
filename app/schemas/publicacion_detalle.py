@@ -14,7 +14,6 @@ class PublicacionDetalleOut(BaseModel):
     imagen_url: Optional[str] = None
     visible: Optional[bool] = None
     donacion: DonacionOut
-    usuario: UsuarioOut
 
     model_config = {"from_attributes": True}
 
