@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from app.utils.estado_nombre import EstadoNombreEnum
+from datetime import datetime
 
 # Crear publicaciones nuevas
 class PublicacionCreate(BaseModel):
@@ -16,7 +17,8 @@ class PublicacionOut(BaseModel):
     # usuario_id: Optional[int]
     # imagen_url: Optional[str]
     # visible: Optional[bool]
-    # fecha_publicacion: Optional[datetime]
+    fecha_publicacion: Optional[datetime]
+
 
     model_config = {"from_attributes": True}
 
