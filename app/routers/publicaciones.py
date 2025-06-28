@@ -54,7 +54,7 @@ def crear_publicacion(
 # Listar todas las publicaciones
 @router.get("/", response_model=List[PublicacionOut])
 def listar_publicaciones(db: Session = Depends(get_db)):
-    publicaciones = db.query(Publicacion).options(selectinload(Publicacion.estado_obj)).all()
+    publicaciones = db.query(Publicacion).options(selectinload(Publicacion.estado)).all()
     return [PublicacionOut.model_validate(p) for p in publicaciones]
 
 
@@ -69,7 +69,7 @@ def publicaciones_con_paginacion(
     db: Session = Depends(get_db)
 ):
     query = db.query(Publicacion).options(
-        selectinload(Publicacion.estado_obj),
+        selectinload(Publicacion.estado),
         selectinload(Publicacion.donacion).selectinload(Donacion.categoria),
         selectinload(Publicacion.usuario).selectinload(Usuario.ubicacion)
     )
@@ -99,7 +99,7 @@ def mis_publicaciones_paginadas(
     query = db.query(Publicacion).filter(
         Publicacion.usuario_id == usuario_actual.id
     ).options(
-        selectinload(Publicacion.estado_obj),
+        selectinload(Publicacion.estado),
         selectinload(Publicacion.donacion).selectinload(Donacion.categoria),
         selectinload(Publicacion.usuario).selectinload(Usuario.ubicacion)
     )
@@ -121,7 +121,7 @@ def mis_publicaciones_paginadas(
 @router.get("/{publicacion_id}", response_model=PublicacionOut)
 def obtener_publicacion(publicacion_id: int, db: Session = Depends(get_db)):
     publicacion = db.query(Publicacion)\
-        .options(selectinload(Publicacion.estado_obj))\
+        .options(selectinload(Publicacion.estado))\
         .filter(Publicacion.id == publicacion_id).first()
 
     if not publicacion:
@@ -169,6 +169,33 @@ def cambiar_estado_publicacion(
     return PublicacionOut.model_validate(publicacion)
 
 # Actualizar publicación por donación (si ya existe)
+# @router.put("/por-donacion/{donacion_id}", response_model=PublicacionOut)
+# def actualizar_publicacion_por_donacion(
+#     donacion_id: int,
+#     datos: PublicacionUpdate,
+#     db: Session = Depends(get_db),
+#     usuario_actual: Usuario = Depends(obtener_usuario_actual)
+# ):
+#     donacion = db.query(Donacion).filter(
+#         Donacion.id == donacion_id,
+#         Donacion.usuario_id == usuario_actual.id
+#     ).first()
+#     if not donacion:
+#         raise HTTPException(status_code=403, detail="No tenés permiso para esta donación")
+#
+#     publicacion = db.query(Publicacion).filter(
+#         Publicacion.donacion_id == donacion_id
+#     ).first()
+#
+#     if not publicacion:
+#         raise HTTPException(status_code=404, detail="No hay publicación para esta donación")
+#
+#     for campo, valor in datos.dict(exclude_unset=True).items():
+#         setattr(publicacion, campo, valor)
+#
+#     db.commit()
+#     db.refresh(publicacion)
+#     return PublicacionOut.model_validate(publicacion)
 @router.put("/por-donacion/{donacion_id}", response_model=PublicacionOut)
 def actualizar_publicacion_por_donacion(
     donacion_id: int,

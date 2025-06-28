@@ -9,7 +9,7 @@ from typing import Optional
 class PublicacionDetalleOut(BaseModel):
     id: int
     mensaje: str
-    estado: EstadoNombreEnum
+    estado_nombre: EstadoNombreEnum
     fecha_publicacion: Optional[datetime]
     imagen_url: Optional[str] = None
     visible: Optional[bool] = None

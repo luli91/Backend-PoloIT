@@ -12,7 +12,7 @@ class PublicacionCreate(BaseModel):
 class PublicacionOut(BaseModel):
     id: int
     mensaje: str
-    estado: EstadoNombreEnum
+    estado_nombre: EstadoNombreEnum
     # donacion_id: Optional[int]
     # usuario_id: Optional[int]
     # imagen_url: Optional[str]
@@ -29,7 +29,6 @@ class PublicacionEstadoUpdate(BaseModel):
 # Actualizar parcialmente cualquier campo, útil para editar desde una donación
 class PublicacionUpdate(BaseModel):
     mensaje: Optional[str] = None
-    estado: Optional[EstadoNombreEnum] = None
     imagen_url: Optional[str] = None
     visible: Optional[bool] = None
 
