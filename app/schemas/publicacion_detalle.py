@@ -2,7 +2,6 @@ from datetime import datetime
 from pydantic import BaseModel
 from app.utils.estado_nombre import EstadoNombreEnum
 from app.schemas.donacion import DonacionOut
-from app.schemas.usuario import UsuarioOut
 from typing import Optional
 
 
