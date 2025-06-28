@@ -13,10 +13,10 @@ class PublicacionOut(BaseModel):
     id: int
     mensaje: str
     estado_nombre: EstadoNombreEnum
-    # donacion_id: Optional[int]
+    donacion_id: Optional[int]
     # usuario_id: Optional[int]
-    # imagen_url: Optional[str]
-    # visible: Optional[bool]
+    imagen_url: Optional[str]
+    visible: Optional[bool]
     fecha_publicacion: Optional[datetime]
 
 

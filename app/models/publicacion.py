@@ -34,7 +34,7 @@ class Publicacion(Base):
     __tablename__ = "publicacion"
 
     id = Column(Integer, primary_key=True, index=True)
-    mensaje = Column(String, nullable=False)
+    mensaje = Column(String, nullable=False, default="")
     donacion_id = Column(Integer, ForeignKey("donacion.id"), nullable=False, unique=True)
     usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
     estado_id = Column(Integer, ForeignKey("estado.id"), nullable=False)
