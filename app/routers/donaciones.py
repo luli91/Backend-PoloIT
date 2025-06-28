@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
-from typing import List
-
 from app.database import get_db
 from app.models.donacion import Donacion
 from app.schemas.donacion import DonacionCreate, DonacionOut, DonacionWithPublicaciones
@@ -43,9 +41,6 @@ def listar_donaciones(
         has_prev=page > 1,
         items=[DonacionOut.model_validate(d) for d in donaciones]
     )
-
-
-
 
 # Ver detalles de una donación
 @router.get("/{donacion_id}", response_model=DonacionWithPublicaciones)
