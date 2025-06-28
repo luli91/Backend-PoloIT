@@ -7,6 +7,7 @@ from app.models.donacion import Donacion
 from app.schemas.donacion import DonacionCreate, DonacionOut, DonacionWithPublicaciones
 from app.models.usuario import Usuario
 from app.auth.jwt import obtener_usuario_actual
+from app.schemas.paginacion import PaginatedResponse
 
 router = APIRouter(
     prefix="/donaciones",
@@ -14,18 +15,37 @@ router = APIRouter(
 )
 
 # Listar todas las donaciones
-@router.get("/", response_model=List[DonacionOut])
-def listar_donaciones(db: Session = Depends(get_db)):
-    donaciones = db.query(Donacion)\
-        .options(
-            selectinload(Donacion.usuario),
-            selectinload(Donacion.categoria),
-            selectinload(Donacion.publicaciones)
-        ).all()
+@router.get("/", response_model=PaginatedResponse[DonacionOut])
+def listar_donaciones(
+    page: int = 1,
+    per_page: int = 10,
+    db: Session = Depends(get_db),
+    usuario_actual: Usuario = Depends(obtener_usuario_actual)
+):
+    query = db.query(Donacion).options(
+        selectinload(Donacion.usuario),
+        selectinload(Donacion.categoria),
+        selectinload(Donacion.publicaciones)
+    )
+
+    if usuario_actual.rol != "admin":
+        query = query.filter(Donacion.usuario_id == usuario_actual.id)
+
+    total = query.count()
+    donaciones = query.offset((page - 1) * per_page).limit(per_page).all()
+
+    return PaginatedResponse[DonacionOut](
+        total=total,
+        page=page,
+        per_page=per_page,
+        pages=(total + per_page - 1) // per_page,
+        has_next=page * per_page < total,
+        has_prev=page > 1,
+        items=[DonacionOut.model_validate(d) for d in donaciones]
+    )
 
 
 
-    return donaciones
 
 # Ver detalles de una donación
 @router.get("/{donacion_id}", response_model=DonacionWithPublicaciones)
