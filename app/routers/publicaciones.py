@@ -166,7 +166,7 @@ def cambiar_estado_publicacion(
     db.refresh(publicacion)
     return PublicacionOut.model_validate(publicacion)
 
-@router.put("/publicacion/{publicacion_id}", response_model=PublicacionOut)
+@router.put("/{publicacion_id}", response_model=PublicacionOut)
 def actualizar_publicacion(
     publicacion_id: int,
     datos: PublicacionUpdate,
