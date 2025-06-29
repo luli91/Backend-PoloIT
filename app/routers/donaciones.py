@@ -74,8 +74,6 @@ def crear_donacion(
     db.add(nueva_donacion)
     db.commit()
     db.refresh(nueva_donacion)
-    # Eliminar esta línea ya que tiene_publicacion se calcula automáticamente
-    # nueva_donacion.tiene_publicacion = False  # Inicialmente no tiene
     return nueva_donacion
 
 # Actualizar una donación propia
@@ -101,7 +99,7 @@ def actualizar_donacion(
     db.commit()
     db.refresh(donacion)
 
-    donacion.tiene_publicacion = len(donacion.publicaciones) > 0
+    # ❌ Esta línea se elimina: donacion.tiene_publicacion = ...
     return donacion
 
 # Eliminar una donación propia
