@@ -8,7 +8,6 @@ from app.routers import usuarios, donaciones, publicaciones, categorias, estados
 from app.seed import cargar_categorias, cargar_estados
 from fastapi.security import HTTPBearer
 
-
 load_dotenv()
 
 # Crear tablas (solo si no usamos Alembic)
@@ -61,6 +60,7 @@ app = FastAPI(
         "name": "MIT",
     },
 )
+
 
 # Personalizar OpenAPI para incluir JWT en la documentación
 def custom_openapi():
@@ -122,6 +122,7 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 # Ejecutar seeds al iniciar (solo si las tablas están vacías)
+
 @app.on_event("startup")
 def inicializar_datos():
     from app.database import SessionLocal
@@ -131,16 +132,7 @@ def inicializar_datos():
     cargar_estados(db)
     db.close()
 
-# Configurar CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Cambiar esto en producción
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Incluir todos los routers
+# ✅ Incluir todos los routers
 app.include_router(ping)
 app.include_router(usuarios)
 app.include_router(donaciones)
