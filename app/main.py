@@ -132,7 +132,16 @@ def inicializar_datos():
     cargar_estados(db)
     db.close()
 
-# ✅ Incluir todos los routers
+# Configurar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://frontend-poloitv2-production.up.railway.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 app.include_router(ping)
 app.include_router(usuarios)
 app.include_router(donaciones)
