@@ -19,6 +19,7 @@ class Donacion(Base):
     publicaciones = relationship("Publicacion", back_populates="donacion")
     usuario = relationship("Usuario", back_populates="donaciones")
     categoria = relationship("Categoria", back_populates="donaciones")
+    registros_correo = relationship("RegistroCorreo", back_populates="donacion")
 
     @hybrid_property
     def tiene_publicacion(self) -> bool:
