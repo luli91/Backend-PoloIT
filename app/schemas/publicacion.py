@@ -20,6 +20,7 @@ class PublicacionOut(BaseModel):
     fecha_publicacion: Optional[datetime]
 
 
+
     model_config = {"from_attributes": True}
 
 # Cambiar unicamente el estado

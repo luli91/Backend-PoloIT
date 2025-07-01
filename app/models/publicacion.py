@@ -22,3 +22,4 @@ class Publicacion(Base):
     @property
     def estado_nombre(self) -> str:
         return self.estado.nombre
+

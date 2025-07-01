@@ -4,7 +4,6 @@ from app.utils.estado_nombre import EstadoNombreEnum
 from app.schemas.donacion import DonacionOut
 from typing import Optional
 
-
 class PublicacionDetalleOut(BaseModel):
     id: int
     mensaje: str

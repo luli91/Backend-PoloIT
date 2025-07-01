@@ -56,10 +56,12 @@ def crear_publicacion(
 @router.get("/", response_model=List[PublicacionOut])
 def listar_publicaciones(db: Session = Depends(get_db)):
     publicaciones = db.query(Publicacion).options(selectinload(Publicacion.estado)).all()
+
     return [PublicacionOut.model_validate(p) for p in publicaciones]
 
 
 # Obtener publicaciones con detalles:
+
 @router.get("/detalle", response_model=PaginatedResponse[PublicacionDetalleOut])
 def publicaciones_con_paginacion(
     page: int = 1,
@@ -68,6 +70,7 @@ def publicaciones_con_paginacion(
 ):
     query = db.query(Publicacion).filter(Publicacion.visible == True).options(
         selectinload(Publicacion.estado),
+
         selectinload(Publicacion.donacion).selectinload(Donacion.categoria),
         selectinload(Publicacion.usuario).selectinload(Usuario.ubicacion)
     )
@@ -84,7 +87,6 @@ def publicaciones_con_paginacion(
         has_prev=page > 1,
         items=[PublicacionDetalleOut.model_validate(p) for p in publicaciones]
     )
-
 
 # Obtener mis publicaciones:
 @router.get("/mis", response_model=PaginatedResponse[PublicacionDetalleOut])
@@ -98,6 +100,7 @@ def mis_publicaciones_paginadas(
         Publicacion.usuario_id == usuario_actual.id
     ).options(
         selectinload(Publicacion.estado),
+
         selectinload(Publicacion.donacion).selectinload(Donacion.categoria),
         selectinload(Publicacion.usuario).selectinload(Usuario.ubicacion)
     )
@@ -115,11 +118,12 @@ def mis_publicaciones_paginadas(
         items=[PublicacionDetalleOut.model_validate(p) for p in publicaciones]
     )
 
+
 # Obtener una publicación por ID
 @router.get("/{publicacion_id}", response_model=PublicacionOut)
 def obtener_publicacion(publicacion_id: int, db: Session = Depends(get_db)):
     publicacion = db.query(Publicacion)\
-        .options(selectinload(Publicacion.estado))\
+        .options(selectinload(Publicacion.estado_obj))\
         .filter(Publicacion.id == publicacion_id).first()
 
     if not publicacion:
@@ -258,4 +262,3 @@ def subir_imagen_publicacion(
     db.refresh(publicacion)
 
     return PublicacionOut.model_validate(publicacion)
-
