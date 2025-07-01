@@ -3,10 +3,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from app.database import Base, engine
-from app.models import usuario, donacion, categoria, estado, ubicacion, publicacion
-from app.routers import usuarios, donaciones, publicaciones, categorias, estados, ubicaciones, ping
+from app.models import *  # Esto importará todos los modelos definidos en __all__
+from app.routers import usuarios, donaciones, publicaciones, categorias, estados, ubicaciones, ping, correos
 from app.seed import cargar_categorias, cargar_estados
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
+
 
 load_dotenv()
 
@@ -147,6 +148,8 @@ app.include_router(publicaciones)
 app.include_router(categorias)
 app.include_router(estados)
 app.include_router(ubicaciones)
+
+app.include_router(correos)
 
 # ✅ Endpoint raíz
 @app.get("/", tags=["Root"])
