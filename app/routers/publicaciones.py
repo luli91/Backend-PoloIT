@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
 from typing import List
-
+from fastapi import UploadFile, File
+from app.supabase_client import supabase
 from app.database import get_db
 from app.models.publicacion import Publicacion
 from app.models.estado import Estado
@@ -54,13 +55,12 @@ def crear_publicacion(
 # Listar todas las publicaciones
 @router.get("/", response_model=List[PublicacionOut])
 def listar_publicaciones(db: Session = Depends(get_db)):
-    publicaciones = db.query(Publicacion).options(selectinload(Publicacion.estado_obj)).all()
+    publicaciones = db.query(Publicacion).options(selectinload(Publicacion.estado)).all()
+
     return [PublicacionOut.model_validate(p) for p in publicaciones]
 
 
 # Obtener publicaciones con detalles:
-
-from app.schemas.publicacion_detalle import PublicacionDetalleOut
 
 @router.get("/detalle", response_model=PaginatedResponse[PublicacionDetalleOut])
 def publicaciones_con_paginacion(
@@ -68,8 +68,9 @@ def publicaciones_con_paginacion(
     per_page: int = 10,
     db: Session = Depends(get_db)
 ):
-    query = db.query(Publicacion).options(
-        selectinload(Publicacion.estado_obj),
+    query = db.query(Publicacion).filter(Publicacion.visible == True).options(
+        selectinload(Publicacion.estado),
+
         selectinload(Publicacion.donacion).selectinload(Donacion.categoria),
         selectinload(Publicacion.usuario).selectinload(Usuario.ubicacion)
     )
@@ -88,7 +89,6 @@ def publicaciones_con_paginacion(
     )
 
 # Obtener mis publicaciones:
-
 @router.get("/mis", response_model=PaginatedResponse[PublicacionDetalleOut])
 def mis_publicaciones_paginadas(
     page: int = 1,
@@ -99,7 +99,8 @@ def mis_publicaciones_paginadas(
     query = db.query(Publicacion).filter(
         Publicacion.usuario_id == usuario_actual.id
     ).options(
-        selectinload(Publicacion.estado_obj),
+        selectinload(Publicacion.estado),
+
         selectinload(Publicacion.donacion).selectinload(Donacion.categoria),
         selectinload(Publicacion.usuario).selectinload(Usuario.ubicacion)
     )
@@ -169,28 +170,23 @@ def cambiar_estado_publicacion(
     db.refresh(publicacion)
     return PublicacionOut.model_validate(publicacion)
 
-# Actualizar publicación por donación (si ya existe)
-@router.put("/por-donacion/{donacion_id}", response_model=PublicacionOut)
-def actualizar_publicacion_por_donacion(
-    donacion_id: int,
+@router.put("/{publicacion_id}", response_model=PublicacionOut)
+def actualizar_publicacion(
+    publicacion_id: int,
     datos: PublicacionUpdate,
     db: Session = Depends(get_db),
     usuario_actual: Usuario = Depends(obtener_usuario_actual)
 ):
-    donacion = db.query(Donacion).filter(
-        Donacion.id == donacion_id,
-        Donacion.usuario_id == usuario_actual.id
-    ).first()
-    if not donacion:
-        raise HTTPException(status_code=403, detail="No tenés permiso para esta donación")
-
-    publicacion = db.query(Publicacion).filter(
-        Publicacion.donacion_id == donacion_id
-    ).first()
+    publicacion = db.query(Publicacion).filter(Publicacion.id == publicacion_id).first()
 
     if not publicacion:
-        raise HTTPException(status_code=404, detail="No hay publicación para esta donación")
+        raise HTTPException(status_code=404, detail="Publicación no encontrada")
 
+    # Verificar permiso: usuario propietario o admin
+    if publicacion.usuario_id != usuario_actual.id and usuario_actual.rol != "admin":
+        raise HTTPException(status_code=403, detail="No autorizado para modificar esta publicación")
+
+    # Actualizar campos
     for campo, valor in datos.dict(exclude_unset=True).items():
         setattr(publicacion, campo, valor)
 
@@ -218,3 +214,51 @@ def eliminar_publicacion(
 
     return {"ok": True, "mensaje": "Publicación eliminada"}
 
+
+@router.put("/{publicacion_id}/upload-imagen", response_model=PublicacionOut)
+def subir_imagen_publicacion(
+    publicacion_id: int,
+    archivo: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    usuario_actual: Usuario = Depends(obtener_usuario_actual)
+):
+    # Buscar la publicación
+    publicacion = db.query(Publicacion).filter(Publicacion.id == publicacion_id).first()
+    if not publicacion:
+        raise HTTPException(status_code=404, detail="Publicación no encontrada")
+
+    if publicacion.usuario_id != usuario_actual.id and usuario_actual.rol != "admin":
+        raise HTTPException(status_code=403, detail="No autorizado")
+
+    contents = archivo.file.read()
+    file_path = f"publicaciones/{publicacion_id}/{archivo.filename}"
+
+    try:
+        # Borrar archivo previo si existe
+        try:
+            supabase.storage.from_("imagenes").remove([file_path])
+        except Exception:
+            pass  # ignorar error si no existía
+
+        # Subir archivo nuevo, forzando Content-Type
+        supabase.storage.from_("imagenes").upload(
+            file_path,
+            contents,
+            file_options={"content-type": archivo.content_type}
+        )
+
+        # Obtener URL pública limpia (sin token)
+        public_url = supabase.storage.from_("imagenes").get_public_url(file_path).split('?')[0]
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al subir imagen: {str(e)}"
+        )
+
+    # Actualizar publicación
+    publicacion.imagen_url = public_url
+    db.commit()
+    db.refresh(publicacion)
+
+    return PublicacionOut.model_validate(publicacion)

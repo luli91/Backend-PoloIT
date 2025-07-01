@@ -7,7 +7,7 @@ class Publicacion(Base):
     __tablename__ = "publicacion"
 
     id = Column(Integer, primary_key=True, index=True)
-    mensaje = Column(String, nullable=False)
+    mensaje = Column(String, nullable=False, default="")
     donacion_id = Column(Integer, ForeignKey("donacion.id"), nullable=False, unique=True)
     usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
     estado_id = Column(Integer, ForeignKey("estado.id"), nullable=False)
@@ -20,8 +20,6 @@ class Publicacion(Base):
     estado = relationship("Estado", back_populates="publicaciones")
 
     @property
-    def estado(self) -> str:
-        return self.estado_obj.nombre  # ← nuevo nombre para evitar colisión con el campo original
+    def estado_nombre(self) -> str:
+        return self.estado.nombre
 
-    # Relación original (renombrada)
-    estado_obj = relationship("Estado", back_populates="publicaciones")
